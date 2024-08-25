@@ -24,6 +24,7 @@ name = "actix-hello"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "parking_lot",
 ]
 
 [[package]]
