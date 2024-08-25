@@ -1,4 +1,4 @@
-use actix_web::{dev::ServerHandle, get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{dev::ServerHandle, middleware, get, post, web, App, HttpResponse, HttpServer, Responder};
 use parking_lot::Mutex;
 
 #[get("/")]
@@ -23,9 +23,12 @@ async fn stop(stop_handle: web::Data<StopHandle>) -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     // Create the stop handle container
     let stop_handle = web::Data::new(StopHandle::default());
+
+    log::info!("starting HTTP server at http://localhost:8080");
 
     let srv = HttpServer::new({
         let stop_handle = stop_handle.clone();    
@@ -37,6 +40,7 @@ async fn main() -> std::io::Result<()> {
                 .service(echo)
                 .route("/hey", web::get().to(manual_hello))
                 .service(stop)
+                .wrap(middleware::Logger::default())
         }
     })
     .bind(("127.0.0.1", 8080))?
